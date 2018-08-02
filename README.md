@@ -1,4 +1,4 @@
-# Open Keystore Protocol
+# Open Keystore Protocol 1.0
 Open Keystore(oks) is a proposed API standard to allow secure remote access 
 to private keys in an Ethereum wallet.
 
@@ -16,7 +16,9 @@ To implement a minimal Open Keystore server application, only three endpoints
 that respond to GET requests are required.
 
 **/info** Returns general information about the server.
+
 **/accounts** Returns a list of the user's Ethereum account addresses
+
 **/account/{address}** Returns the encrypted private key for the given address
 in standard Ethereum key store format.
 
@@ -35,8 +37,10 @@ and privacy of private key ownership.
 
 ## Decentralization
 The protocol is fully decentralized. 
+
 A user may run a personal keystore server on a local machine and use it with any
 web wallet interface.
+
 A user may use multiple servers or third-party keystore providers to access
 different sets of accounts for increased privacy.
 
@@ -60,8 +64,7 @@ Two Factor Authentication (2FA), IP address restrictions, or other security
 features.
 
 ## FAQ
-#### Storing private keys on an Internet connected server - isn't that really
-insecure?
+#### Storing private keys on an Internet connected server - isn't that really insecure?
 If you're running an Ethereum node right now, you're already doing that!
 Your Ethereum node is publicly accessible from the open Internet, and it's
 storing encrypted private keys.
@@ -84,8 +87,7 @@ iterations significantly mitigates this threat.
 If you're worried about brute force attacks on your encrypted private keys, you
 can always store them locally and run a keystore server on your local machine.
 
-#### How can a keystore server prevent others from downloading my encrypted
-wallet?
+#### How can a keystore server prevent others from downloading my encrypted wallet?
 The server is free to implement any kind of authorization, such as requiring you
 to log in with a valid username and password before any keys can be loaded. 
 
@@ -139,10 +141,13 @@ This endpoint provides discovery and general metadata about the keystore
 provider, allowing automatic configuration for clients.
 
 #### Response Fields
+
 **version** string, OPTIONAL. The version of the Open Keystore protocol this
 service supports. Valid versions are: `1.0`. If this field is missing, defaults
 to `1.0`.
+
 **providerName** string, OPTIONAL. A friendly name for the keystore provider.
+
 **loginUrl** string, OPTIONAL. If the provider requires authentication, a
 well-formed URL to redirect the user to for authentication. Client software MUST
 redirect the user to the server-provided loginUrl if requests to the other
@@ -170,9 +175,12 @@ The server SHOULD require authentication to access this endpoint.
 Each item in the array MUST be a valid Ethereum address.
 
 #### HTTP Response Codes
+
 **200 OK** Success
+
 **403 Forbidden** The user does not have permission to access this resource.
 Typically, this means the user has not authenticated with the provider server. 
+
 **500 Internal Server Error** Error loading accounts list.
 
 
@@ -199,18 +207,21 @@ The server MUST convert the address parameter to lowercase in order to match
 both checksummed and non checksummed addresses.
 
 #### HTTP Response Codes
+
 **200 OK** Success
+
 **400 Bad Request** The address parameter in the URL is missing or malformed.
+
 **403 Forbidden** The user does not have permission to access this resource.
 Typically, this means the user has not authenticated with the provider server. 
+
 **404 Not Found**. The encrypted private key for the given address 
 does not exist in the keystore, OR the user is authenticated, but does not have
 permission to access the private key for the given account(for example, in a
 view-only wallet). The server MAY choose to return this error instead of 403
 Forbidden for unauthenticated users to prevent account enumeration attacks.
+
 **500 Internal Server Error** Error loading keystore.
-
-
 
 ## Client Implementation
 This section is advisory and not part of the official spec.
