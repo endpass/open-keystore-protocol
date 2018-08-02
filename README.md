@@ -9,8 +9,8 @@ access to a user's Ethereum accounts.
 
 This API standard is meant to be used by light clients and web wallets that need
 client-side signing of transactions. The server, after taking appropriate steps
-to authenticate the user, exposes a simple REST API than can be used to access
-encrypted private keys, which are then decrypted on the client.
+to authenticate the user, exposes a simple REST API over HTTP. 
+This API can be used to access encrypted private keys, which are then decrypted on the client.
 
 To implement a minimal Open Keystore server application, only three endpoints 
 that respond to GET requests are required.
@@ -26,8 +26,8 @@ Keystore support would have the option of fetching an encrypted key store from a
 user-specified server. The user would then decrypt the wallet with their
 password client-side in order to sign transactions.
 
-This standard does not replace an Ethereum RPC node. Rather, it allows other
-types of servers to store encrypted keys on behalf of web and mobile light
+This standard does not replace an Ethereum RPC node. Rather, it allows standard
+web servers to store encrypted keys on behalf of web and mobile light
 clients.
 
 Open Keystore combines the ease of use of hosted web wallets with the security
@@ -59,7 +59,46 @@ example, a keystore provider may choose to gate access to a user's accounts with
 Two Factor Authentication (2FA), IP address restrictions, or other security
 features.
 
-## API Spec
+## FAQ
+#### Storing private keys on an Internet connected server - isn't that really
+insecure?
+If you're running an Ethereum node right now, you're already doing that!
+Your Ethereum node is publicly accessible from the open Internet, and it's
+storing encrypted private keys.
+
+An Open Keystore server stores private keys in the same encrypted format as a
+Geth or Parity node. The server software is responsible for securing access to
+the encrypted keys.
+
+Because the API provides a very limited attack surface and the server can
+implement additional security measures like two factor authentication, it is
+actually more secure than a comparable Ethereum full node.
+
+#### Can keystore servers see my private keys?
+Nope - your private keys are encrypted at all times, both at rest and in transit
+to you. You only decrypt your private keys on your client with your password.
+It is theoretically possible for a server provider to use brute force to decrypt
+an Ethereum keystore file, but using a strong password and a high number of
+iterations significantly mitigates this threat.
+
+If you're worried about brute force attacks on your encrypted private keys, you
+can always store them locally and run a keystore server on your local machine.
+
+#### How can a keystore server prevent others from downloading my encrypted
+wallet?
+The server is free to implement any kind of authorization, such as requiring you
+to log in with a valid username and password before any keys can be loaded. 
+
+#### How can new Ethereum accounts be generated and saved on the server?
+As an extra security measure, the Open Keystore specification only includes
+methods that are idempotent (don't make any changes). This protects against a
+wide range of security threats such as clickjacking and CSRF attacks.
+
+Additional addresses and wallets can be generated with other wallet software or
+standard JSON-RPC commands on an Ethereum node.
+
+## API Specification
+
 **This is a draft proposal, and subject to change. The API should not be
 considered stable at this time.**
 
