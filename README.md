@@ -1,18 +1,72 @@
 # Open Keystore Protocol
 Open Keystore(oks) is a proposed API standard to allow secure remote access 
 to private keys in an Ethereum wallet.
+
+## Introduction
+
+The Open Keystore protocol is designed as a simple, open standard for providing
+access to a user's Ethereum accounts.
+
+This API standard is meant to be used by light clients and web wallets that need
+client-side signing of transactions. The server, after taking appropriate steps
+to authenticate the user, exposes a simple REST API than can be used to access
+encrypted private keys, which are then decrypted on the client.
+
+To implement a minimal Open Keystore server application, only three endpoints 
+that respond to GET requests are required.
+
+**/info** Returns general information about the server.
+**/accounts** Returns a list of the user's Ethereum account addresses
+**/account/{address}** Returns the encrypted private key for the given address
+in standard Ethereum key store format.
+
+Currently, the common procedure involves manual user entry of private keys into
+client-side wallets, an insecure and error-prone process. A wallet with Open
+Keystore support would have the option of fetching an encrypted key store from a
+user-specified server. The user would then decrypt the wallet with their
+password client-side in order to sign transactions.
+
 This standard does not replace an Ethereum RPC node. Rather, it allows other
 types of servers to store encrypted keys on behalf of web and mobile light
 clients.
 
+Open Keystore combines the ease of use of hosted web wallets with the security
+and privacy of private key ownership.
+
+## Decentralization
+The protocol is fully decentralized. 
+A user may run a personal keystore server on a local machine and use it with any
+web wallet interface.
+A user may use multiple servers or third-party keystore providers to access
+different sets of accounts for increased privacy.
+
+## Security
+
+Open Keystore support in web and mobile wallets would significantly mitigate
+common threats such as key loggers, malware, and phishing. 
+Because the private key is not stored on the user's device or entered by the
+user, it is not vulnerable to key loggers or many types of malware.
+
+There is some degree of security risk if the user chooses to use a keystore
+server that is accessible on the open Internet, or if a third-party server is
+improperly secured. However, because private keys are always encrypted at rest
+with strong encryption, and never transmitted unencrypted, the impact of a
+provider server breach can be minimized with timely notification of affected
+users.
+
+Enhanced security features are left to keystore server providers to implement. For
+example, a keystore provider may choose to gate access to a user's accounts with
+Two Factor Authentication (2FA), IP address restrictions, or other security
+features.
+
+## API Spec
 **This is a draft proposal, and subject to change. The API should not be
 considered stable at this time.**
 
-
-## API Documentation
 The API is deliberately kept lightweight and easy to implement. A great deal
 of functionality is not dictated by the spec and is left to the specific
 implementation.
+
 
 ### General
 API responses SHOULD be well-formed JSON. The appropriate headers for a JSON
@@ -26,7 +80,7 @@ cross-domain access for Javascript applications.
 All API endpoints are REQUIRED. The API does not need to be in a top-level directory.
 For example, `GET https://www.example.com/open-keystore/v1/accounts` is a valid request.
 
-### Authentication
+### Authentication and Authorization
 All methods except for `GET /info` SHOULD require authentication. 
 All authentication is done through server-set HTTP cookies. 
 
@@ -91,6 +145,9 @@ Typically, this means the user has not authenticated with the provider server.
 ]
 ```
 
+The response format is identical to the output of `web3.eth.accounts` in the
+web3.js library.
+
 ### GET /account/{address}
 
 Returns the encrypted private key for the corresponding account in [**Ethereum
@@ -129,7 +186,7 @@ Client parses reponse code and displays the appropriate error to the user, such
 as "Not Logged In", "Rate Limit Exceeeded", etc.
 4. Client prompts user to visit `loginUrl` and authenticate. After successful
   authentication, go to step 5.
-5. Client requests `/accounts` and displays the user's accounts in its
+5. User clicks "Log in". Client requests `/accounts` and displays the user's accounts in its
    interface.
 6. When the user needs to sign a transaction, client requests the account's
    encrypted keystore from `/accounts/{account}` and prompts the user for a
